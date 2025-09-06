@@ -5,9 +5,11 @@ export default async function handler(req, res) {
 
   const { prompt } = req.body;
 
-  // Demo response
-  return res.status(200).json({
+  // ✅ এখন শুধু ডেমো হিসেবে একটা ভিডিও লিঙ্ক পাঠাচ্ছি
+  // পরে এখানে আসল API logic লিখব
+  res.status(200).json({
     status: "success",
-    video_url: "https://www.w3schools.com/html/mov_bbb.mp4"
+    video_url: "https://www.w3schools.com/html/mov_bbb.mp4",
+    text: prompt
   });
 }
