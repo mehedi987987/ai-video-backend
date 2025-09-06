@@ -1,5 +1,4 @@
-export default function handler(req, res) {
-  // ✅ Allow requests from anywhere (CORS fix)
+export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -14,9 +13,31 @@ export default function handler(req, res) {
 
   const { prompt } = req.body || {};
 
-  res.status(200).json({
-    status: "success",
-    video_url: "https://www.w3schools.com/html/mov_bbb.mp4",
-    your_prompt: prompt || "No prompt received"
-  });
+  try {
+    // ✅ Google Gemini-Pro API Call
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + process.env.GOOGLE_API_KEY,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }]}],
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data && data.candidates && data.candidates[0].content.parts[0].text) {
+      return res.status(200).json({
+        status: "success",
+        ai_output: data.candidates[0].content.parts[0].text,
+        your_prompt: prompt,
+      });
+    } else {
+      return res.status(500).json({ status: "fail", message: "No response from AI", raw: data });
+    }
+  } catch (err) {
+    res.status(500).json({ status: "fail", message: err.message });
+  }
 }
