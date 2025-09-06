@@ -14,9 +14,10 @@ export default async function handler(req, res) {
   const { prompt } = req.body || {};
 
   try {
-    // ✅ Google Gemini-Pro API Call
+    // ✅ Try Gemini 1.5 Flash model (text output)
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + process.env.GOOGLE_API_KEY,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" +
+        process.env.GOOGLE_API_KEY,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -28,6 +29,7 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    // Debug log করতে Response ফেরত দেই
     if (data && data.candidates && data.candidates[0].content.parts[0].text) {
       return res.status(200).json({
         status: "success",
@@ -35,7 +37,11 @@ export default async function handler(req, res) {
         your_prompt: prompt,
       });
     } else {
-      return res.status(500).json({ status: "fail", message: "No response from AI", raw: data });
+      return res.status(500).json({ 
+        status: "fail",
+        message: "No response from AI", 
+        raw: data   // Debugging info পাঠাচ্ছি
+      });
     }
   } catch (err) {
     res.status(500).json({ status: "fail", message: err.message });
